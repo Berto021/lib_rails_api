@@ -37,10 +37,31 @@ class BooksController < ApplicationController
     
     head :no_content
   end
-  
+
+  def change_status
+    book = Book.find(params[:id])
+    if book.update(status: params[:status])
+      render json: book
+    else
+      render json: { errors: book.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def only_reading
+    books = Book.where(status: :reading)
+    render json: books
+  end
+
+  def percent_of_read_books
+    books = Book.where(status: :read)
+    total_books = Book.count
+    percent = total_books > 0 ? (books.count.to_f / total_books * 100).round(2) : 0
+    render json: { percent_of_read_books: percent }
+  end
+
+  def book_params
+    params.require(:book).permit(:title, :author)
+  end
 end
 
-def book_params
-    params.require(:book).permit(:title, :author)
-end
 
